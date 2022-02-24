@@ -1,0 +1,7 @@
+.vscode/
+old-stuff/
+
+jsconfig.json
+
+*.txt
+*.code-workspace
