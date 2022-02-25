@@ -10,14 +10,9 @@ let chartType;
 let selColorScheme;	// Color scheme selection
 let colorScheme;
 let color_index;
-let sldMer;			// Meridian slider
-let cbxLblPlanets;	// Show planet labels?
-let showSolarSystem;
-let cbxDrawEcliptic;
-
-// Central RA for Rectangular and Elliptical charts
-let RAc = 12;		// Central RA (meridian)
-let RA0 = 12 - RAc;	// Leftmost RA 
+let cbxSolarSys;	// Show solar system?
+let cbxDrawEcliptic;// Show ecliptic?
+let cbxDrawGrid;	// Show grid?
 
 // Degree superscripts
 const deg_sup  = "°";
@@ -47,13 +42,13 @@ const color_scheme = [
 ];
 
 // Margins around the inner frame
-const yMargins = 8;			// Top and bottom margins
 const xMargins = 8;			// Left and right margins
+const yMargins = 8;			// Top and bottom margins
 
 // What to show
 let show_grid = true;
-let show_mouse = false;
 let show_ecliptic = true;
+let show_solar_system = true;
 
 // Celestial poles [x, y, diam, name, stars, dic]
 let north_pole;
@@ -67,7 +62,6 @@ const cpw = 200;	// Control panel width
 const cph = 200;	// Control panel height
 
 let dspMag;		// Display current magnitude
-let dspMer;		// Display current (center) meridian
 
 const epsln = 23.43642	// 23.43642° = 23°26′11.1″ 
 let cose;				// cos(epsln)
@@ -137,19 +131,15 @@ function createControls() {
 	sldMag = createSlider(-2, 8, 2, 0.2);
 	sldMag.input(sldMagChanged);
 
-	// dspMer = createP("Meridian");
-	// sldMer = createSlider(0, 23, 12, 2);
-	// sldMer.input(sldMerChanged);
-
 	createP("<hr>");
 
 	cbxDrawEcliptic = createCheckbox("Show ecliptic", true);
 	cbxDrawEcliptic.changed(cbxDrawEclipticChanged);
 	cbxDrawEclipticChanged();
 
-	cbxLblPlanets = createCheckbox("Show Solar System", true);
-	cbxLblPlanets.changed(cbxLblPlanetsChanged);
-	cbxLblPlanetsChanged();
+	cbxSolarSys = createCheckbox("Show Solar System", true);
+	cbxSolarSys.changed(cbxSolarSysChanged);
+	cbxSolarSysChanged();
 
 	cbxDrawGrid = createCheckbox("Show grid", true);
 	cbxDrawGrid.changed(cbxDrawGridChanged);
@@ -197,11 +187,10 @@ function loadIAU() {
 }
 
 function starHash(ra, de) {
-	// Key = RA * 1000 + abs(RE)
+	// Preserve 1 decimal of RA but only the integer part of the DE
+	// Key = int(RA * 10) * 1000 + abs(RE)
 	const hash = int(ra * 10) * 1000 + int(abs(de));
 	return de < 0 ? -hash : hash;
-	//return int(ra/2) * 2000 + int(abs(de)/2) * 2;
-	//return int(de) * 100 + int(ra);
 }
 
 function createDics() {
@@ -245,14 +234,13 @@ function draw() {
 	if (show_ecliptic)
 	 	theChart.drawEcliptic();
 	theChart.drawStars();
-	if (showSolarSystem)
+	if (show_solar_system)
 		theChart.drawSolarSystem();
 	if (hover_star) {
 		drawStarLabel();
 		hover_star = null;
 	}
 	dspMag.html("Magnitude <= " + sldMag.value());
-//	dspMer.html("Meridian = " + sldMer.value() + hang_sup);
 }
 
 function drawStarLabel() {
@@ -267,12 +255,6 @@ function drawStarLabel() {
 }
 
 function sldMagChanged() {
-	redraw();
-}
-
-function sldMerChanged() {
-	RAc = sldMer.value();
-	RA0 = 12 - RAc;	// Leftmost RA 
 	redraw();
 }
 
@@ -322,8 +304,8 @@ function chartTypeChanged() {
 	// redraw();
 }
 
-function cbxLblPlanetsChanged() {
-	showSolarSystem = cbxLblPlanets.checked();
+function cbxSolarSysChanged() {
+	show_solar_system = cbxSolarSys.checked();
 	redraw();
 }
 
